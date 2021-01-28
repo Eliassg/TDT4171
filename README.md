@@ -1,6 +1,6 @@
 # TDT4171
 
-##Artificial Intelligence Methods
+## Artificial Intelligence Methods
 
 ## Shortcuts to assignment reports
 
