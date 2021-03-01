@@ -133,9 +133,9 @@ def problem1e():
 
 
 if __name__ == "__main__":
-    #problem1b()
-    #problem1c()
-    #problem1d()
+    problem1b()
+    problem1c()
+    problem1d()
     problem1e()
 
 
