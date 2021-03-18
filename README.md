@@ -4,7 +4,7 @@
 
 ## Shortcuts to assignment reports
 * [Uncertainty, Bayesian networks. Implementation of inference by enumeration algorithm](https://github.com/Eliassg/TDT4171/blob/main/assignment_1/TDT4171_Assignment_1_report_eliassg.pdf)
-* [Probabilistic reasoning over time with HDD and DBN. Implementation of Forward-backward and Viterbi algorithm](https://github.com/Eliassg/TDT4171/blob/main/assignment_2/TDT4171_Assignment_2_eliassg.pdf)
+* [Probabilistic reasoning over time with HMM and DBN. Implementation of Forward-backward and Viterbi algorithm](https://github.com/Eliassg/TDT4171/blob/main/assignment_2/TDT4171_Assignment_2_eliassg.pdf)
 * [Making Decisions: Decision Network](https://github.com/Eliassg/TDT4171/blob/main/assignment_3/TDT4171_Assignment_3_eliassg.pdf)
 * [Decision Tree Learning](https://github.com/Eliassg/TDT4171/blob/main/assignment_4/TDT4171_Assignment_4_eliassg.pdf)
 
