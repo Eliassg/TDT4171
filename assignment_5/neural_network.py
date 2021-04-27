@@ -1,13 +1,10 @@
-# Use Python 3.8 or newer (https://www.python.org/downloads/)
 import unittest
-# Remember to install numpy (https://numpy.org/install/)!
 import numpy as np
 import pickle
 import os
-
+import random
 
 class NeuralNetwork:
-    """Implement/make changes to places in the code that contains #TODO."""
 
     def __init__(self, input_dim: int, hidden_layer: bool) -> None:
         """
@@ -17,14 +14,12 @@ class NeuralNetwork:
         :return: None.
         """
 
-        # --- PLEASE READ --
         # Use the parameters below to train your feed-forward neural network.
 
         # Number of hidden units if hidden_layer = True.
         self.hidden_units = 25
 
-        # This parameter is called the step size, also known as the learning rate (lr).
-        # See 18.6.1 in AIMA 3rd edition (page 719).
+        # Learning rate (lr).
         # This is the value of α on Line 25 in Figure 18.24.
         self.lr = 1e-3
 
@@ -39,10 +34,10 @@ class NeuralNetwork:
         self.x_train, self.y_train = None, None
         self.x_test, self.y_test = None, None
 
-        # TODO: Make necessary changes here. For example, assigning the arguments "input_dim" and "hidden_layer" to
-        # variables and so forth.
+        self.input_dim = input_dim
+        self.hidden_layer = hidden_layer
 
-    def load_data(self, file_path: str = os.path.join(os.getcwd(), 'data_breast_cancer.p')) -> None:
+    def load_data(self, file_path: str = os.path.join(os.getcwd(), 'TDT4171/assignment_5/data_breast_cancer.p')) -> None:
         """
         Do not change anything in this method.
 
@@ -62,15 +57,42 @@ class NeuralNetwork:
 
     def train(self) -> None:
         """Run the backpropagation algorithm to train this neural network"""
-        # TODO: Implement the back-propagation algorithm outlined in Figure 18.24 (page 734) in AIMA 3rd edition.
+        # Implement the back-propagation algorithm outlined in Figure 18.24 (page 734) in AIMA 3rd edition.
         # Only parts of the algorithm need to be implemented since we are only going for one hidden layer.
+        
+        if self.hidden_layer: 
+            layers = [self.input_dim, self.hidden_units, 1]
+        else:
+            layers = [self.input_dim, 1]
+        
+        self.biases =  [np.random.randn(i, 1) for i in layers[1:]]
+        self.weights = [np.random.randn(i, j) 
+                        for i, j in zip(layers[:-1], layers[1:])]
+
+        inputs = self.x_train               #[(398,30)] matrix 
+        target = self.y_train               #[(398,)] vector
 
         # Line 6 in Figure 18.24 says "repeat".
         # We are going to repeat self.epochs times as written in the __init()__ method.
+        for epoch in range(self.epochs):
+            
+            if not self.hidden_layer:
+                z = inputs.dot(self.weights[0]) + self.biases[0]
+                activations = sigmoid(z)
+                activations.resize((398,))  #predicted
+                errors = target - activations
 
-        # Line 27 in Figure 18.24 says "return network". Here you do not need to return anything as we are coding
-        # the neural network as a class
+                # for each example in examples:
+                for idx, x_i in enumerate(inputs):
+                    y_predicted = activations[idx]
+                    update = self.lr * (errors[idx])
+                    self.weights[0] += update * x_i.reshape((30,1))
+                    self.biases[0] += update * 1
+
+            if self.hidden_layer:
+                pass
         pass
+
 
     def predict(self, x: np.ndarray) -> float:
         """
@@ -80,7 +102,25 @@ class NeuralNetwork:
         :return: A float specifying probability which is bounded [0, 1].
         """
         # TODO: Implement the forward pass.
-        return 1  # Placeholder, remove when implementing
+
+        if self.hidden_layer:
+            print((self.weights))
+            output = sigmoid(x.dot(self.weights[1]))
+        else:
+            output = sigmoid(x.dot(self.weights[0]) + self.biases[0])
+            if output < 0.5:
+                return 0
+            else:
+                return 1
+            
+
+def sigmoid(z):
+    """The sigmoid function."""
+    return 1.0/(1.0+np.exp(-z))
+
+def sigmoid_prime(z):
+    """Derivative of the sigmoid function."""
+    return sigmoid(z)*(1-sigmoid(z))
 
 
 class TestAssignment5(unittest.TestCase):
@@ -120,6 +160,7 @@ class TestAssignment5(unittest.TestCase):
 
         self.network = self.nn_class(self.n_features, False)
         accuracy = self.get_accuracy()
+        print("\n Accuracy for perceptron: " + str(accuracy))
         self.assertTrue(accuracy > self.threshold,
                         'This implementation is most likely wrong since '
                         f'the accuracy ({accuracy}) is less than {self.threshold}.')
@@ -135,4 +176,9 @@ class TestAssignment5(unittest.TestCase):
 
 
 if __name__ == '__main__':
+  
+    n = NeuralNetwork(30, False)
+    n.load_data()
+    n.train()
+
     unittest.main()
