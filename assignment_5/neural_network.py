@@ -116,7 +116,6 @@ class NeuralNetwork:
                     
                     update = update.reshape((-1,1))                                 # update bias from hidden layer to output layer (1x1) bias weight
                     self.biases[1] += update
-        pass
 
 
     def predict(self, x: np.ndarray) -> float:
