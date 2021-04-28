@@ -60,22 +60,22 @@ class NeuralNetwork:
         # Implement the back-propagation algorithm outlined in Figure 18.24 (page 734) in AIMA 3rd edition.
         # Only parts of the algorithm need to be implemented since we are only going for one hidden layer.
         
+        # determine structure of layer in NN
         if self.hidden_layer: 
             layers = [self.input_dim, self.hidden_units, 1]
         else:
             layers = [self.input_dim, 1]
-        
-        self.biases =  [np.random.randn(i, 1) for i in layers[1:]]
-        self.weights = [np.random.randn(i, j) 
+        # set weights
+        self.biases =  [np.random.uniform(-0.5, 0.5, (i, 1)) for i in layers[1:]]
+        self.weights = [np.random.uniform(-0.5, 0.5,(i, j)) 
                         for i, j in zip(layers[:-1], layers[1:])]
-
+        # set targets and inputs
         inputs = self.x_train               #[(398,30)] matrix 
         target = self.y_train               #[(398,)] vector
 
         # Line 6 in Figure 18.24 says "repeat".
         # We are going to repeat self.epochs times as written in the __init()__ method.
         for epoch in range(self.epochs):
-            
             if not self.hidden_layer:
                 z = inputs.dot(self.weights[0]) + self.biases[0]
                 activations = sigmoid(z)
@@ -83,14 +83,39 @@ class NeuralNetwork:
                 errors = target - activations
 
                 # for each example in examples:
-                for idx, x_i in enumerate(inputs):
-                    y_predicted = activations[idx]
-                    update = self.lr * (errors[idx])
-                    self.weights[0] += update * x_i.reshape((30,1))
+                for i, x_i in enumerate(inputs):
+                    y_predicted = activations[i]
+                    update = self.lr * (errors[i])
+                    self.weights[0] += update * x_i.reshape((-1,1))
                     self.biases[0] += update * 1
 
             if self.hidden_layer:
-                pass
+                #TODO: implement generalized implementation that supports different number of hidden layers
+                # for each example in examples:
+                for i, x_i in enumerate(inputs):
+
+                    z_h = inputs.dot(self.weights[0]) + self.biases[0].reshape((-1,))
+                    activations_h = sigmoid(z_h)                                    # activations for hidden layer
+                    z_o = activations_h.dot(self.weights[1]) + self.biases[1]
+                    activations_o = sigmoid(z_o)                                    # activations for output layer
+                
+                    error_out = target[i] - activations_o[i]
+                    delta_out = sigmoid_prime(activations_o[i]) * error_out
+
+                    hidden_weights = self.weights[1].reshape(-1,)
+                    delta_hidden = sigmoid_prime(activations_h[i]) * hidden_weights * delta_out
+
+                    update = self.lr * delta_hidden
+                    self.weights[0] += update * x_i.reshape((-1,1))                 # update weights from input layer to hidden layer (30x25) weights
+                    
+                    update = update.reshape((-1,1))                                 # update bias from input layer to hidden layer (1x25) bias weights
+                    self.biases[0] += update
+
+                    update = self.lr * delta_out
+                    self.weights[1] += update * activations_h[i].reshape((-1,1))    # update weights from hidden layer to output layer (25x1) weights
+                    
+                    update = update.reshape((-1,1))                                 # update bias from hidden layer to output layer (1x1) bias weight
+                    self.biases[1] += update
         pass
 
 
@@ -101,11 +126,14 @@ class NeuralNetwork:
         :param x: A single example (vector) with shape = (number of features)
         :return: A float specifying probability which is bounded [0, 1].
         """
-        # TODO: Implement the forward pass.
-
+        #supports one hidden layer
         if self.hidden_layer:
-            print((self.weights))
-            output = sigmoid(x.dot(self.weights[1]))
+            output_hl = sigmoid(x.dot(self.weights[0]) + self.biases[0].reshape((self.hidden_units,)))
+            output = sigmoid(output_hl.dot(self.weights[1]) + self.biases[1])
+            if output < 0.5:
+                return 0
+            else:
+                return 1
         else:
             output = sigmoid(x.dot(self.weights[0]) + self.biases[0])
             if output < 0.5:
@@ -113,13 +141,11 @@ class NeuralNetwork:
             else:
                 return 1
             
-
+# g(z)
 def sigmoid(z):
-    """The sigmoid function."""
     return 1.0/(1.0+np.exp(-z))
-
+# g'(z)
 def sigmoid_prime(z):
-    """Derivative of the sigmoid function."""
     return sigmoid(z)*(1-sigmoid(z))
 
 
@@ -170,6 +196,7 @@ class TestAssignment5(unittest.TestCase):
 
         self.network = self.nn_class(self.n_features, True)
         accuracy = self.get_accuracy()
+        print("\n Accuracy for one hidden layer: " + str(accuracy))
         self.assertTrue(accuracy > self.threshold,
                         'This implementation is most likely wrong since '
                         f'the accuracy ({accuracy}) is less than {self.threshold}.')
@@ -177,8 +204,8 @@ class TestAssignment5(unittest.TestCase):
 
 if __name__ == '__main__':
   
-    n = NeuralNetwork(30, False)
-    n.load_data()
-    n.train()
+    #n = NeuralNetwork(30, True)
+    #n.load_data()
+    #n.train()
 
     unittest.main()
